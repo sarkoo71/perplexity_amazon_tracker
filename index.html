@@ -272,8 +272,7 @@ function renderMainLayout() {
     return `<div class="main-layout"><div class="sidebar"><div class="sidebar-logo">Amazon<span>Tracker</span></div><div class="sidebar-nav"><a class="${STATE.currentPage === 'dashboard' ? 'active' : ''}" onclick="navigateTo('dashboard')"><span class="icon">📊</span> Dashboard</a><a class="${STATE.currentPage === 'orders' ? 'active' : ''}" onclick="navigateTo('orders')"><span class="icon">📦</span> Orders</a><a class="${STATE.currentPage === 'import' ? 'active' : ''}" onclick="navigateTo('import')"><span class="icon">📁</span> Import</a><a class="${STATE.currentPage === 'settings' ? 'active' : ''}" onclick="navigateTo('settings')"><span class="icon">⚙️</span> Settings</a></div><div class="sidebar-bottom"><div class="sidebar-user"><div class="avatar">${STATE.currentUser.name ? STATE.currentUser.name[0].toUpperCase() : 'U'}</div><div><div style="font-weight:600;color:#ddd">${STATE.currentUser.name || STATE.currentUser.username}</div><div>${STATE.currentUser.username}</div></div></div></div></div><div class="main-content">${STATE.currentPage === 'dashboard' ? renderDashboard() : STATE.currentPage === 'import' ? renderImport() : STATE.currentPage === 'orders' ? renderOrders() : STATE.currentPage === 'settings' ? renderSettings() : ''}</div></div>`;
 }
 
-function renderApp() {const app = document.getElementById('app'); if (!STATE.currentUser) {app.innerHTML = renderLogin();} else {loadOrders(); app.innerHTML = renderMainLayout(); if (STATE.currentPage === 'dashboard') {setTimeout(createCharts, 100);}}}
-
+function renderApp() {const app = document.getElementById('app'); if (!STATE.currentUser) {app.innerHTML = renderLogin();} else {loadOrders(); app.innerHTML = renderMainLayout(); setupFileInputListener(); } if (STATE.currentPage !== 'dashboard') STATE.currentPage = 'dashboard'; renderApp();}
 function handleLogin() {const user = document.getElementById('loginUser').value; const pass = document.getElementById('loginPass').value; if (login(user, pass)) {renderApp();} else {document.getElementById('loginError').style.display = 'block';}}
 
 function navigateTo(page) {STATE.currentPage = page; renderApp();}
@@ -293,9 +292,9 @@ function dismissAlert(id) {}
 function init() {const savedUser = storage.get('currentUser'); if (savedUser) {STATE.currentUser = savedUser;} STATE.settings = storage.get('settings') || STATE.settings; if (!storage.get('users')) {storage.set('users', [{id: 1, username: 'demo', password: 'demo', name: 'Demo User'}]);} renderApp();}
 
 init();
+        setupFileInputListener();
         
-setTimeout(() => {
-  const fileInput = document.getElementById('csvFileInput');
+function setupFileInputListener() {  const fileInput = document.getElementById('csvFileInput');
   if (fileInput) {
     fileInput.addEventListener('change', (e) => {
       const file = e.target.files[0];
@@ -318,7 +317,6 @@ setTimeout(() => {
       }
     });
   }
-}, 500);
-</script>
+}</script>
 </body>
 </html>
