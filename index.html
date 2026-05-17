@@ -262,8 +262,8 @@ function renderImport() {
 }
 
 function renderOrders() {
-  return `<div class="page-active"><div class="topbar"><h2>All Orders</h2></div><div style="padding: 20px;">Orders list coming soon...</div></div>`;
-}
+    return `<div class="page-active"><div class="topbar"><h2>All Orders</h2><div class="topbar-actions"><button class="btn-sm btn-danger" onclick="deleteSelectedOrders()" id="deleteSelectedBtn" style="display:none;">Delete Selected</button></div></div><div style="padding: 20px;"><div class="table-wrap"><table><thead><tr><th><input type="checkbox" id="selectAll" onchange="toggleSelectAll()"></th><th>Product</th><th>Order Date</th><th>Return Deadline</th><th>Price</th><th>Refund</th><th>Commission</th><th>Status</th><th>Actions</th></tr></thead><tbody>${STATE.orders.length > 0 ? STATE.orders.map(o => `<tr><td><input type="checkbox" class="order-checkbox" data-order-id="${o.id}" onchange="updateDeleteButton()"></td><td>${o.productName}</td><td>${o.orderDate ? new Date(o.orderDate).toLocaleDateString() : 'N/A'}</td><td>${o.returnDeadline ? new Date(o.returnDeadline).toLocaleDateString() : 'N/A'}</td><td>$${o.priceWithTax.toFixed(2)}</td><td><span class="badge ${o.refundReceived ? 'badge-green' : 'badge-red'}">${o.refundReceived ? '✓ Received' : 'Pending'}</span></td><td><span class="badge ${o.commissionReceived ? 'badge-green' : 'badge-orange'}">${o.commission > 0 ? '$'+o.commission.toFixed(2) : 'N/A'}</span></td><td><span class="badge badge-blue">${o.status || 'delivered'}</span></td><td><button class="btn-sm btn-outline" onclick="editOrder(${o.id})">Edit</button> <button class="btn-sm btn-danger" onclick="deleteOrder(${o.id})">Delete</button></td></tr>`).join('') : '<tr><td colspan="9"><div class="empty-state"><div class="icon">📦</div><p>No orders yet</p><small>Import orders using the Import page</small></div></td></tr>'}</tbody></table></div></div></div>`;
+}}
 
 function renderSettings() {
   return `<div class="page-active"><div class="topbar"><h2>Settings</h2></div><div style="padding: 20px;">Settings coming soon...</div></div>`;
@@ -287,6 +287,35 @@ function saveEditOrder(id) {const updates = {productName: document.getElementByI
 
 function markReceived(id, type) {const updates = {}; if (type === 'refund') updates.refundReceived = true; if (type === 'commission') updates.commissionReceived = true; updateOrder(id, updates); renderApp();}
 
+
+        function deleteOrder(id) { if (confirm('Are you sure you want to delete this order?')) { STATE.orders = STATE.orders.filter(o => o.id !== id); saveOrders(); renderApp(); } }
+
+        function toggleSelectAll() {
+    const selectAllCheckbox = document.getElementById('selectAll');
+    const checkboxes = document.querySelectorAll('.order-checkbox');
+    checkboxes.forEach(cb => cb.checked = selectAllCheckbox.checked);
+    updateDeleteButton();
+}
+
+function updateDeleteButton() {
+    const checkboxes = document.querySelectorAll('.order-checkbox');
+    const checkedBoxes = Array.from(checkboxes).filter(cb => cb.checked);
+    const deleteBtn = document.getElementById('deleteSelectedBtn');
+    if (deleteBtn) {
+        deleteBtn.style.display = checkedBoxes.length > 0 ? 'inline-block' : 'none';
+    }
+}
+
+function deleteSelectedOrders() {
+    const checkboxes = document.querySelectorAll('.order-checkbox');
+    const selectedIds = Array.from(checkboxes).filter(cb => cb.checked).map(cb => parseInt(cb.getAttribute('data-order-id')));
+    if (selectedIds.length === 0) return;
+    if (confirm(`Are you sure you want to delete ${selectedIds.length} order(s)?`)) {
+        STATE.orders = STATE.orders.filter(o => !selectedIds.includes(o.id));
+        saveOrders();
+        renderApp();
+    }
+}
 function dismissAlert(id) {}
 
 function init() {const savedUser = storage.get('currentUser'); if (savedUser) {STATE.currentUser = savedUser;} STATE.settings = storage.get('settings') || STATE.settings; if (!storage.get('users')) {storage.set('users', [{id: 1, username: 'demo', password: 'demo', name: 'Demo User'}]);} renderApp();}
