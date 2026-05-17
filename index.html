@@ -201,7 +201,7 @@ function importCSV(csvText) {
         };
         addOrder(order);
     }
-    renderApp();
+    renderApp(); return {success: true, count: lines.length - 1, message: 'Orders imported successfully'};
 }
 
 function exportCSV() {
