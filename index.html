@@ -345,7 +345,7 @@ renderApp();
 function dismissAlert(id) {
 renderApp();
 }
-function setupFileInputListener() {
+function handleCSVFile(input) { const file = input.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = function(e) { const result = importCSV(e.target.result); const statusDiv = document.getElementById('importStatus'); if (statusDiv) { if (result.success) { statusDiv.innerHTML = `<div style="color:#4caf50;font-weight:bold">✓ Imported ${result.count} orders!</div>`; setTimeout(() => navigate('dashboard'), 1500); } else { statusDiv.innerHTML = `<div style="color:#f44336">✗ Error: ${result.message}</div>`; } } }; reader.readAsText(file); } function setupFileInputListener() {
 const fileInput = document.getElementById('csvFileInput');
 if (fileInput) {
 fileInput.addEventListener('change', (e) => {
@@ -377,7 +377,7 @@ STATE.settings = storage.get('settings') || STATE.settings;
 if (!storage.get('users')) {storage.set('users', [{id: 1, username: 'demo', password: 'demo', name: 'Demo User'}]);}
 renderApp();
 }
-Object.assign(window, {handleLogin, navigate, showAddOrderModal, saveNewOrder, editOrder, saveEditOrder, markReceived, dismissAlert, exportCSV, logout});
+Object.assign(window, {handleLogin, navigate, showAddOrderModal, saveNewOrder, editOrder, saveEditOrder, markReceived, dismissAlert, exportCSV, logout, handleCSVFile});
 init();
 </script>
 </body>
