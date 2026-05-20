@@ -170,16 +170,16 @@ alerts.push({type: 'commission', order, daysLeft, message: `${daysLeft} days lef
 });
 return alerts;
 }
-function importCSV(csvText) {
+function parseCSVLine(line){const r=[];let c='',q=false;for(let i=0;i<line.length;i++){const ch=line[i];if(ch=='"'){if(q&&line[i+1]=='"'){c+='"';i++;}else{q=!q;}}else if(ch==','&&!q){r.push(c.trim());c='';}else{c+=ch;}}r.push(c.trim());return r;} function normDate(s){if(!s)return '';if(/^\d{4}-\d{2}-\d{2}/.test(s))return s;const d=new Date(s);return isNaN(d)?'':d.toISOString().split('T')[0];} function importCSV(csvText) {
 const lines = csvText.trim().split('\n');
 const headers = lines[0].split(',');
 for (let i = 1; i < lines.length; i++) {
-const vals = lines[i].split(',');
+const vals = parseCSVLine(lines[i]);
 if (vals.length < 6) continue;
 const order = {
 productName: vals[0] || 'Unknown',
-orderDate: vals[1] || new Date().toISOString(),
-returnDeadline: vals[2] || null,
+orderDate: normDate(vals[1]) || new Date().toISOString().split('T')[0],
+returnDeadline: normDate(vals[2]) || null,
 priceWithoutTax: parseFloat(vals[3]) || 0,
 priceWithTax: parseFloat(vals[4]) || 0,
 commission: parseFloat(vals[5]) || 0,
@@ -196,7 +196,7 @@ return {success: true, count: lines.length - 1, message: 'Orders imported succes
 }
 function exportCSV() {
 const headers = 'Product Name,Order Date,Return Deadline,Price (No Tax),Price (With Tax),Commission,Refund,Refund Received,Commission Received,Status,Image URL';
-const rows = STATE.orders.map(o => `${o.productName},${o.orderDate},${o.returnDeadline || ''},${o.priceWithoutTax},${o.priceWithTax},${o.commission},${o.refund},${o.refundReceived},${o.commissionReceived},${o.status},${o.imageUrl || ''}`);
+const rows = STATE.orders.map(o => [o.productName,o.orderDate,o.returnDeadline||'',o.priceWithoutTax,o.priceWithTax,o.commission,o.refund,o.refundReceived,o.commissionReceived,o.status,o.imageUrl||''].map(f=>'"'+String(f).replace(/"/g,'""')+'"').join(','));
 const csv = headers + '\n' + rows.join('\n');
 const blob = new Blob([csv], {type: 'text/csv'});
 const url = URL.createObjectURL(blob);
