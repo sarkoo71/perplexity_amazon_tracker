@@ -175,19 +175,19 @@ const lines = csvText.trim().split('\n');
 const headers = lines[0].split(',');
 for (let i = 1; i < lines.length; i++) {
 const vals = parseCSVLine(lines[i]);
-if (vals.length < 6) continue;
+if (vals.length < 3) continue; if (!vals[0] || vals[0].startsWith('=') || vals[1].startsWith('=')) continue;
 const order = {
-productName: vals[0] || 'Unknown',
-orderDate: normDate(vals[1]) || new Date().toISOString().split('T')[0],
-returnDeadline: normDate(vals[2]) || null,
-priceWithoutTax: parseFloat(vals[3]) || 0,
-priceWithTax: parseFloat(vals[4]) || 0,
-commission: parseFloat(vals[5]) || 0,
-refund: parseFloat(vals[6]) || 0,
-refundReceived: vals[7] === 'true',
-commissionReceived: vals[8] === 'true',
-status: vals[9] || 'delivered',
-imageUrl: vals[10] || ''
+productName: vals[IDX.name]||'Unknown',
+orderDate: normDate(vals[IDX.odate]) || new Date().toISOString().split('T')[0],
+returnDeadline: normDate(vals[IDX.rdate]) || null,
+priceWithoutTax: parseFloat(vals[IDX.pnt]) || 0,
+priceWithTax: parseFloat(vals[IDX.pt]) || 0,
+commission: parseFloat(vals[IDX.comm]) || 0,
+refund: parseFloat(vals[IDX.ref]) || 0,
+refundReceived: vals[IDX.refR] === 'true',
+commissionReceived: vals[IDX.commR] === 'true',
+status: vals[IDX.stat] || 'delivered',
+imageUrl: vals[IDX.img] || ''
 };
 addOrder(order);
 }
